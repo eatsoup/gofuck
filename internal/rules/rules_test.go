@@ -65,3 +65,20 @@ func assertNewCommandIn(t *testing.T, name string, c *types.Command, want string
 	}
 	t.Errorf("%s: want %q in GetNewCommand(%q) = %v", name, want, c.Script, got)
 }
+
+// getNewCommands returns the raw slice from GetNewCommand for flexible assertions.
+func getNewCommands(t *testing.T, name string, c *types.Command) []string {
+	t.Helper()
+	return mustRule(t, name).GetNewCommand(c)
+}
+
+// assertContains asserts that the slice contains the given string.
+func assertContains(t *testing.T, got []string, want string) {
+	t.Helper()
+	for _, s := range got {
+		if s == want {
+			return
+		}
+	}
+	t.Errorf("want %q in %v, not found", want, got)
+}

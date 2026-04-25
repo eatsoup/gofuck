@@ -2,6 +2,45 @@ package rules
 
 import "testing"
 
+// ---- git_add ----
+func TestGitAdd(t *testing.T) {
+	withTmpDir(t)
+	touchFile(t, "unknown")
+	
+	out := "error: pathspec 'unknown' did not match any file(s) known to git."
+	
+	assertMatch(t, "git_add", cmd("git submodule update unknown", out), true)
+	assertMatch(t, "git_add", cmd("git commit unknown", out), true)
+	
+	assertMatch(t, "git_add", cmd("git submodule update known", ""), false)
+	assertMatch(t, "git_add", cmd("git commit known", ""), false)
+	outMissing := "error: pathspec 'missing' did not match any file(s) known to git."
+	assertMatch(t, "git_add", cmd("git submodule update missing", outMissing), false) 
+	
+	assertNewCommand(t, "git_add", cmd("git submodule update unknown", out), "git add -- unknown && git submodule update unknown")
+	assertNewCommand(t, "git_add", cmd("git commit unknown", out), "git add -- unknown && git commit unknown")
+}
+
+// ---- git_pull ----
+func TestGitPull(t *testing.T) {
+	out := `There is no tracking information for the current branch.
+Please specify which branch you want to merge with.
+See git-pull(1) for details
+
+    git pull <remote> <branch>
+
+If you wish to set tracking information for this branch you can do so with:
+
+    git branch --set-upstream-to=<remote>/<branch> master
+
+`
+	assertMatch(t, "git_pull", cmd("git pull", out), true)
+	assertMatch(t, "git_pull", cmd("git pull", ""), false)
+	assertMatch(t, "git_pull", cmd("ls", out), false)
+	
+	assertNewCommand(t, "git_pull", cmd("git pull", out), "git branch --set-upstream-to=origin/master master && git pull")
+}
+
 // ---- git_add_force ----
 func TestGitAddForce(t *testing.T) {
 	out := "The following paths are ignored by one of your .gitignore files:\n" +
@@ -245,4 +284,76 @@ func TestGitRmStaged(t *testing.T) {
 	assertMatch(t, "git_rm_staged", cmd("git rm foo", ""), false)
 	assertNewCommands(t, "git_rm_staged", cmd("git rm foo", out),
 		[]string{"git rm --cached foo", "git rm -f foo"})
+}
+
+// ---- git_clone_missing ----
+func TestGitCloneMissing(t *testing.T) {
+	withPath(t, "") // clear PATH so 'https://...' is not found
+	
+	urls := []string{
+		"https://github.com/nvbn/thefuck.git",
+		"https://github.com/nvbn/thefuck",
+		"http://github.com/nvbn/thefuck.git",
+		"git@github.com:nvbn/thefuck.git",
+		"git@github.com:nvbn/thefuck",
+		"ssh://git@github.com:nvbn/thefuck.git",
+	}
+	
+	invalid := []string{
+		"",  // No command
+		"notacommand",  // Command not found
+		"ssh git@github.com:nvbn/thefrick.git",  // ssh command, not a git clone
+		"git clone foo",  // Valid clone
+		"git clone https://github.com/nvbn/thefuck.git",  // Full command
+		"github.com/nvbn/thefuck.git",  // Missing protocol
+		"github.com:nvbn/thefuck.git",  // SSH missing username
+		"git clone git clone ssh://git@github.com:nvbn/thefrick.git",  // 2x clone
+		"https:/github.com/nvbn/thefuck.git",  // Bad protocol
+	}
+
+	outputs := []string{
+		"No such file or directory",
+		"not found",
+		"is not recognised as",
+	}
+
+	for _, u := range urls {
+		for _, o := range outputs {
+			assertMatch(t, "git_clone_missing", cmd(u, o), true)
+			assertNewCommand(t, "git_clone_missing", cmd(u, o), "git clone "+u)
+		}
+	}
+	
+	for _, u := range invalid {
+		for _, o := range outputs {
+			assertMatch(t, "git_clone_missing", cmd(u, o), false)
+		}
+		assertMatch(t, "git_clone_missing", cmd(u, "some other output"), false)
+	}
+}
+
+// ---- git_rebase_merge_dir ----
+func TestGitRebaseMergeDir(t *testing.T) {
+	out := `It seems that there is already a rebase-merge directory, and
+I wonder if you are in the middle of another rebase.  If that is the
+case, please try
+	git rebase (--continue | --abort | --skip)
+If that is not the case, please
+	rm -fr ".git/rebase-merge"
+and run me again.  I am stopping in case you still have something
+valuable there.
+`
+
+	assertMatch(t, "git_rebase_merge_dir", cmd("git rebase master", out), true)
+	assertMatch(t, "git_rebase_merge_dir", cmd("git rebase -skip", out), true)
+	
+	assertMatch(t, "git_rebase_merge_dir", cmd("git rebase master", ""), false)
+	assertMatch(t, "git_rebase_merge_dir", cmd("ls", out), false)
+	
+	// Check new commands generated (the last option parsed from output should be rm -fr ".git/rebase-merge")
+	assertNewCommands(t, "git_rebase_merge_dir", cmd("git rebase master", out),
+		[]string{"git rebase --abort", "git rebase --skip", "git rebase --continue", `rm -fr ".git/rebase-merge"`})
+	
+	assertNewCommands(t, "git_rebase_merge_dir", cmd("git rebase -skip", out),
+		[]string{"git rebase --skip", "git rebase --abort", "git rebase --continue", `rm -fr ".git/rebase-merge"`})
 }
