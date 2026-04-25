@@ -150,7 +150,7 @@ Legend:
 | long_form_help | + | + | + | OK |
 | ls_all | + | + | + | OK |
 | ls_lah | + | + | + | OK |
-| man | - | n/a | + | NEEDS-RULE |
+| man | + | + | + | OK |
 | man_no_space | + | + | + | OK |
 | mercurial | + | + | + | OK |
 | missing_space_before_subcommand | + | - | + | NEEDS-TEST |
@@ -325,7 +325,7 @@ write the corresponding Go test against upstream's `test_<rule>.py`.
 
 - [ ] **S2.1** Implement `apt_get` rule (needs `CommandNotFound` lookup —
       pick a static replacement or scaffold a hook for it). Test parity.
-- [ ] **S2.2** Implement `man` rule. Pure string manipulation; should be
+- [x] **S2.2** Implement `man` rule. Pure string manipulation; should be
       easy. Test parity with `tests/rules/test_man.py`.
 - [ ] **S2.3** Implement `test.py` rule (1-liner; priority 900).
 - [ ] **S2.4** Implement `history` rule (depends on shell-history infra —
