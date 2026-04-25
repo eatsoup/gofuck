@@ -28,3 +28,21 @@ full original license text.
 
 This is a work-in-progress port. See [TODO.md](TODO.md) for the current state of test
 coverage and documented divergences from upstream behaviour.
+
+## Usage
+
+```sh
+go build ./cmd/gofuck
+
+# pass the previous command and its output:
+./gofuck --output "mkdir: cannot create directory 'a/b/c': No such file or directory" -- mkdir a/b/c
+# → mkdir -p a/b/c
+
+# or pipe the output via stdin:
+mkdir a/b/c 2>&1 | ./gofuck --stdin -- mkdir a/b/c
+
+# print every candidate, not just the top one:
+./gofuck --all --output "..." -- <command>
+```
+
+Shell integration (alias, automatic capture, auto-rerun) is not implemented yet.
