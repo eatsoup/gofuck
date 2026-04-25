@@ -59,18 +59,18 @@ Legend:
 | brew_update_formula | + | + | + | OK |
 | cargo | + | + | - | OK |
 | cargo_no_command | + | + | + | OK |
-| cat_dir | + | - | + | NEEDS-TEST |
-| cd_correction | + | - | + | NEEDS-TEST |
+| cat_dir | + | + | + | OK |
+| cd_correction | + | + | + | OK |
 | cd_cs | + | + | + | OK |
 | cd_mkdir | + | + | + | OK |
 | cd_parent | + | + | + | OK |
-| chmod_x | + | - | + | NEEDS-TEST |
+| chmod_x | + | + | + | OK |
 | choco_install | + | + | + | OK |
 | composer_not_command | + | + | + | OK |
 | conda_mistype | + | + | + | OK |
 | cp_create_destination | + | + | + | OK |
 | cp_omitting_directory | + | + | + | OK |
-| cpp11 | + | - | - | NEEDS-TEST |
+| cpp11 | + | + | - | OK |
 | dirty_untar | + | - | + | NEEDS-TEST |
 | dirty_unzip | + | - | + | NEEDS-TEST |
 | django_south_ghost | + | + | + | OK |
@@ -136,7 +136,7 @@ Legend:
 | grep_recursive | + | + | + | OK |
 | grunt_task_not_found | + | - | + | NEEDS-TEST, DIVERGENT |
 | gulp_not_task | + | + | + | DIVERGENT |
-| has_exists_script | + | - | + | NEEDS-TEST |
+| has_exists_script | + | + | + | OK |
 | heroku_multiple_apps | + | + | + | OK |
 | heroku_not_command | + | + | + | OK |
 | history | - | n/a | + | NEEDS-RULE, DIVERGENT |
@@ -339,12 +339,12 @@ These rules already have Go implementations; the goal is just to add
 Go tests that mirror upstream `test_<rule>.py`. Many will need a small
 `fstest` helper (tmpdir + chdir or `t.Setenv("PATH", ...)`).
 
-- [ ] **S3.0** Add `internal/rules/testfs_test.go` with `withTmpDir`,
+- [x] **S3.0** Add `internal/rules/testfs_test.go` with `withTmpDir`,
       `withPath`, `touchFile` helpers used by the rest of Phase 3.
-- [ ] **S3.1** `cat_dir` test — needs isdir.
-- [ ] **S3.2** `cd_correction` test — needs real subdir listing.
-- [ ] **S3.3** `chmod_x` test — needs file exists + non-exec mode.
-- [ ] **S3.4** `cpp11` test — pure string manipulation, no fixture.
+- [x] **S3.1** `cat_dir` test — needs isdir.
+- [x] **S3.2** `cd_correction` test — needs real subdir listing.
+- [x] **S3.3** `chmod_x` test — needs file exists + non-exec mode.
+- [x] **S3.4** `cpp11` test — pure string manipulation, no fixture.
 - [ ] **S3.5** `dirty_untar` test — needs real tar archive in tmpdir.
 - [ ] **S3.6** `dirty_unzip` test — needs real zip archive in tmpdir.
 - [ ] **S3.7** `fix_file` test — needs `$EDITOR` and a real file.
@@ -355,7 +355,7 @@ Go tests that mirror upstream `test_<rule>.py`. Many will need a small
       (or fix ordering).
 - [ ] **S3.12** `gradle_wrapper` test — needs `./gradlew` file + `$PATH`.
 - [ ] **S3.13** `grep_arguments_order` test — needs real file.
-- [ ] **S3.14** `has_exists_script` test — needs real file.
+- [x] **S3.14** `has_exists_script` test — needs real file.
 - [ ] **S3.15** `ln_s_order` test — needs real file.
 - [ ] **S3.16** `missing_space_before_subcommand` test — controlled `$PATH`.
 - [ ] **S3.17** `no_command` test — controlled `$PATH`.
