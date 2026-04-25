@@ -2,6 +2,8 @@ package rules
 
 import (
 	"fmt"
+	"os"
+	"runtime"
 	"testing"
 )
 
@@ -330,4 +332,74 @@ func TestWhois(t *testing.T) {
 	assertNewCommand(t, "whois", cmd("whois https://en.wikipedia.org/", ""), "whois en.wikipedia.org")
 	assertNewCommands(t, "whois", cmd("whois meta.unix.stackexchange.com", ""),
 		[]string{"whois unix.stackexchange.com", "whois stackexchange.com", "whois com"})
+}
+
+// ---- cat_dir ----
+func TestCatDir(t *testing.T) {
+	withTmpDir(t)
+	mkDir(t, "foo")
+	mkDir(t, "cat")
+	assertMatch(t, "cat_dir", cmd("cat foo", "cat: foo: Is a directory\n"), true)
+	assertMatch(t, "cat_dir", cmd("cat cat", "cat: cat: Is a directory\n"), true)
+	
+	assertMatch(t, "cat_dir", cmd("cat foo", "foo bar baz"), false)
+	assertMatch(t, "cat_dir", cmd("cat foo bar", "foo bar baz"), false)
+	assertMatch(t, "cat_dir", cmd("notcat foo bar", "some output"), false)
+	
+	assertNewCommand(t, "cat_dir", cmd("cat foo", "cat: foo: Is a directory\n"), "ls foo")
+	assertNewCommand(t, "cat_dir", cmd("cat cat", "cat: cat: Is a directory\n"), "ls cat")
+}
+
+// ---- cpp11 ----
+func TestCpp11(t *testing.T) {
+	out1 := "This file requires compiler and library support for the ISO C++ 2011 standard."
+	out2 := "warning: 'auto' type specifier is a C++11 extension [-Wc++11-extensions]"
+	
+	assertMatch(t, "cpp11", cmd("g++ main.cpp", out1), true)
+	assertMatch(t, "cpp11", cmd("clang++ main.cpp", out1), true)
+	assertMatch(t, "cpp11", cmd("g++ main.cpp", out2), true)
+	assertMatch(t, "cpp11", cmd("clang++ main.cpp", out2), true)
+	
+	assertMatch(t, "cpp11", cmd("g++ main.cpp", ""), false)
+	assertMatch(t, "cpp11", cmd("clang++ main.cpp", ""), false)
+	assertMatch(t, "cpp11", cmd("gcc main.cpp", out1), false)
+	
+	assertNewCommand(t, "cpp11", cmd("g++ main.cpp", out1), "g++ main.cpp -std=c++11")
+	assertNewCommand(t, "cpp11", cmd("clang++ main.cpp", out2), "clang++ main.cpp -std=c++11")
+}
+
+// ---- chmod_x ----
+func TestChmodX(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("execute bit operations are unreliable on windows")
+	}
+	withTmpDir(t)
+	touchFile(t, "script")
+	touchFile(t, "script2")
+	_ = os.Chmod("script2", 0755) // executable
+	
+	assertMatch(t, "chmod_x", cmd("./script", "permission denied"), true)
+	assertMatch(t, "chmod_x", cmd("./script", "Permission denied"), true)
+	
+	assertMatch(t, "chmod_x", cmd("script", "permission denied"), false)
+	assertMatch(t, "chmod_x", cmd("./script", ""), false)
+	assertMatch(t, "chmod_x", cmd("./script2", "permission denied"), false) // already executable
+	assertMatch(t, "chmod_x", cmd("./missing", "permission denied"), false)
+	
+	assertNewCommand(t, "chmod_x", cmd("./script", "permission denied"), "chmod +x script && ./script")
+}
+
+// ---- has_exists_script ----
+func TestHasExistsScript(t *testing.T) {
+	withTmpDir(t)
+	touchFile(t, "main")
+	
+	assertMatch(t, "has_exists_script", cmd("main", "main: command not found"), true)
+	assertMatch(t, "has_exists_script", cmd("main --help", "main: command not found"), true)
+	
+	assertMatch(t, "has_exists_script", cmd("main", ""), false)
+	assertMatch(t, "has_exists_script", cmd("missing", "missing: command not found"), false)
+	
+	assertNewCommand(t, "has_exists_script", cmd("main", "main: command not found"), "./main")
+	assertNewCommand(t, "has_exists_script", cmd("main --help", "main: command not found"), "./main --help")
 }

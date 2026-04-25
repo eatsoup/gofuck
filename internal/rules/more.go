@@ -125,7 +125,7 @@ func init() {
 			if len(parts) < 2 {
 				return nil
 			}
-			dest := strings.Split(parts[1], string(os.PathSeparator))
+			dest := strings.Split(filepath.ToSlash(parts[1]), "/")
 			if len(dest) > 0 && dest[len(dest)-1] == "" {
 				dest = dest[:len(dest)-1]
 			}

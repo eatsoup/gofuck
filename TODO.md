@@ -59,20 +59,20 @@ Legend:
 | brew_update_formula | + | + | + | OK |
 | cargo | + | + | - | OK |
 | cargo_no_command | + | + | + | OK |
-| cat_dir | + | - | + | NEEDS-TEST |
-| cd_correction | + | - | + | NEEDS-TEST |
+| cat_dir | + | + | + | OK |
+| cd_correction | + | + | + | OK |
 | cd_cs | + | + | + | OK |
 | cd_mkdir | + | + | + | OK |
 | cd_parent | + | + | + | OK |
-| chmod_x | + | - | + | NEEDS-TEST |
+| chmod_x | + | + | + | OK |
 | choco_install | + | + | + | OK |
 | composer_not_command | + | + | + | OK |
 | conda_mistype | + | + | + | OK |
 | cp_create_destination | + | + | + | OK |
 | cp_omitting_directory | + | + | + | OK |
-| cpp11 | + | - | - | NEEDS-TEST |
-| dirty_untar | + | - | + | NEEDS-TEST |
-| dirty_unzip | + | - | + | NEEDS-TEST |
+| cpp11 | + | + | - | OK |
+| dirty_untar | + | + | + | OK |
+| dirty_unzip | + | + | + | OK |
 | django_south_ghost | + | + | + | OK |
 | django_south_merge | + | + | + | OK |
 | dnf_no_such_command | + | + | + | DIVERGENT |
@@ -82,9 +82,9 @@ Legend:
 | dry | + | + | + | OK |
 | fab_command_not_found | + | + | + | DIVERGENT |
 | fix_alt_space | + | + | + | OK |
-| fix_file | + | - | + | NEEDS-TEST |
+| fix_file | + | + | + | OK |
 | gem_unknown_command | + | + | + | DIVERGENT |
-| git_add | + | - | + | NEEDS-TEST |
+| git_add | + | + | + | OK |
 | git_add_force | + | + | + | OK |
 | git_bisect_usage | + | + | + | OK |
 | git_branch_0flag | + | + | + | OK |
@@ -94,7 +94,7 @@ Legend:
 | git_branch_list | + | + | + | OK |
 | git_checkout | + | + | + | OK |
 | git_clone_git_clone | + | + | + | OK |
-| git_clone_missing | + | - | + | NEEDS-TEST |
+| git_clone_missing | + | + | + | OK |
 | git_commit_add | + | + | + | OK |
 | git_commit_amend | + | + | + | OK |
 | git_commit_reset | + | + | + | OK |
@@ -109,7 +109,7 @@ Legend:
 | git_merge | + | + | + | OK |
 | git_merge_unrelated | + | + | + | OK |
 | git_not_command | + | + | + | OK |
-| git_pull | + | - | + | NEEDS-TEST |
+| git_pull | + | + | + | OK |
 | git_pull_clone | + | + | + | OK |
 | git_pull_uncommitted_changes | + | + | + | OK |
 | git_push | + | + | + | OK |
@@ -117,7 +117,7 @@ Legend:
 | git_push_force | + | + | + | OK |
 | git_push_pull | + | + | + | OK |
 | git_push_without_commits | + | + | + | OK |
-| git_rebase_merge_dir | + | - | + | NEEDS-TEST |
+| git_rebase_merge_dir | + | + | + | OK |
 | git_rebase_no_changes | + | + | + | OK |
 | git_remote_delete | + | + | + | OK |
 | git_remote_seturl_add | + | + | + | OK |
@@ -131,12 +131,12 @@ Legend:
 | go_run | + | + | + | OK |
 | go_unknown_command | + | - | + | NEEDS-TEST, DIVERGENT |
 | gradle_no_task | + | - | + | NEEDS-TEST, DIVERGENT |
-| gradle_wrapper | + | - | + | NEEDS-TEST |
-| grep_arguments_order | + | - | + | NEEDS-TEST |
+| gradle_wrapper | + | + | + | OK |
+| grep_arguments_order | + | + | + | OK |
 | grep_recursive | + | + | + | OK |
 | grunt_task_not_found | + | - | + | NEEDS-TEST, DIVERGENT |
 | gulp_not_task | + | + | + | DIVERGENT |
-| has_exists_script | + | - | + | NEEDS-TEST |
+| has_exists_script | + | + | + | OK |
 | heroku_multiple_apps | + | + | + | OK |
 | heroku_not_command | + | + | + | OK |
 | history | - | n/a | + | NEEDS-RULE, DIVERGENT |
@@ -146,19 +146,19 @@ Legend:
 | javac | + | + | + | OK |
 | lein_not_task | + | + | + | OK |
 | ln_no_hard_link | + | + | + | OK |
-| ln_s_order | + | - | + | NEEDS-TEST |
+| ln_s_order | + | + | + | OK |
 | long_form_help | + | + | + | OK |
 | ls_all | + | + | + | OK |
 | ls_lah | + | + | + | OK |
 | man | - | n/a | + | NEEDS-RULE |
 | man_no_space | + | + | + | OK |
 | mercurial | + | + | + | OK |
-| missing_space_before_subcommand | + | - | + | NEEDS-TEST |
+| missing_space_before_subcommand | + | + | + | OK |
 | mkdir_p | + | + | + | OK |
 | mvn_no_command | + | + | + | OK |
 | mvn_unknown_lifecycle_phase | + | + | + | OK |
 | nixos_cmd_not_found | + | + | + | OK |
-| no_command | + | - | + | NEEDS-TEST |
+| no_command | + | + | + | OK |
 | no_such_file | + | + | + | OK |
 | npm_missing_script | + | - | + | NEEDS-TEST, DIVERGENT |
 | npm_run_script | + | - | + | NEEDS-TEST, DIVERGENT |
@@ -173,7 +173,7 @@ Legend:
 | pip_install | + | + | + | OK |
 | pip_unknown_command | + | + | + | OK |
 | port_already_in_use | + | + | + | OK |
-| prove_recursively | + | - | + | NEEDS-TEST |
+| prove_recursively | + | + | + | OK |
 | python_command | + | + | + | OK |
 | python_execute | + | + | + | OK |
 | python_module_error | + | + | + | OK |
@@ -184,12 +184,12 @@ Legend:
 | remove_trailing_cedilla | + | + | + | OK |
 | rm_dir | + | + | + | OK |
 | rm_root | + | + | + | OK |
-| scm_correction | + | - | + | NEEDS-TEST |
+| scm_correction | + | + | + | OK |
 | sed_unterminated_s | + | + | + | OK |
 | sl_ls | + | + | + | OK |
 | ssh_known_hosts | + | + | + | OK |
 | sudo | + | + | + | OK |
-| sudo_command_from_user_path | + | - | + | NEEDS-TEST |
+| sudo_command_from_user_path | + | + | + | OK |
 | switch_lang | + | + | + | OK |
 | systemctl | + | + | + | OK |
 | terraform_init | + | + | + | OK |
@@ -204,7 +204,7 @@ Legend:
 | vagrant_up | + | + | + | OK |
 | whois | + | + | + | OK |
 | workon_doesnt_exists | + | - | + | NEEDS-TEST, DIVERGENT |
-| wrong_hyphen_before_subcommand | + | - | + | NEEDS-TEST |
+| wrong_hyphen_before_subcommand | + | + | + | OK |
 | yarn_alias | + | + | + | OK |
 | yarn_command_not_found | + | - | + | NEEDS-TEST, DIVERGENT |
 | yarn_command_replaced | + | + | + | OK |
@@ -339,31 +339,31 @@ These rules already have Go implementations; the goal is just to add
 Go tests that mirror upstream `test_<rule>.py`. Many will need a small
 `fstest` helper (tmpdir + chdir or `t.Setenv("PATH", ...)`).
 
-- [ ] **S3.0** Add `internal/rules/testfs_test.go` with `withTmpDir`,
+- [x] **S3.0** Add `internal/rules/testfs_test.go` with `withTmpDir`,
       `withPath`, `touchFile` helpers used by the rest of Phase 3.
-- [ ] **S3.1** `cat_dir` test — needs isdir.
-- [ ] **S3.2** `cd_correction` test — needs real subdir listing.
-- [ ] **S3.3** `chmod_x` test — needs file exists + non-exec mode.
-- [ ] **S3.4** `cpp11` test — pure string manipulation, no fixture.
-- [ ] **S3.5** `dirty_untar` test — needs real tar archive in tmpdir.
-- [ ] **S3.6** `dirty_unzip` test — needs real zip archive in tmpdir.
-- [ ] **S3.7** `fix_file` test — needs `$EDITOR` and a real file.
-- [ ] **S3.8** `git_add` test — needs `Path.exists` mock (use real tmpdir).
-- [ ] **S3.9** `git_clone_missing` test — needs controlled `$PATH`.
-- [ ] **S3.10** `git_pull` test — output-driven; no fixture.
-- [ ] **S3.11** `git_rebase_merge_dir` test — accept ordering divergence
+- [x] **S3.1** `cat_dir` test — needs isdir.
+- [x] **S3.2** `cd_correction` test — needs real subdir listing.
+- [x] **S3.3** `chmod_x` test — needs file exists + non-exec mode.
+- [x] **S3.4** `cpp11` test — pure string manipulation, no fixture.
+- [x] **S3.5** `dirty_untar` test — output/flag-driven (no real archive needed).
+- [x] **S3.6** `dirty_unzip` test — output/flag-driven (no real archive needed).
+- [x] **S3.7** `fix_file` test — needs `$EDITOR` and a real file.
+- [x] **S3.8** `git_add` test — needs `Path.exists` mock (use real tmpdir).
+- [x] **S3.9** `git_clone_missing` test — needs controlled `$PATH`.
+- [x] **S3.10** `git_pull` test — output-driven; no fixture.
+- [x] **S3.11** `git_rebase_merge_dir` test — accept ordering divergence
       (or fix ordering).
-- [ ] **S3.12** `gradle_wrapper` test — needs `./gradlew` file + `$PATH`.
-- [ ] **S3.13** `grep_arguments_order` test — needs real file.
-- [ ] **S3.14** `has_exists_script` test — needs real file.
-- [ ] **S3.15** `ln_s_order` test — needs real file.
-- [ ] **S3.16** `missing_space_before_subcommand` test — controlled `$PATH`.
-- [ ] **S3.17** `no_command` test — controlled `$PATH`.
-- [ ] **S3.18** `prove_recursively` test — needs isdir.
-- [ ] **S3.19** `scm_correction` test — needs `.git`/`.hg` dir.
-- [ ] **S3.20** `sudo_command_from_user_path` test — controlled `$PATH`.
-- [ ] **S3.21** `wrong_hyphen_before_subcommand` test — controlled `$PATH`.
-- [ ] **S3.22** `brew_unknown_command` test — output-driven.
+- [x] **S3.12** `gradle_wrapper` test — needs `./gradlew` file + `$PATH`.
+- [x] **S3.13** `grep_arguments_order` test — needs real file.
+- [x] **S3.14** `has_exists_script` test — needs real file.
+- [x] **S3.15** `ln_s_order` test — needs real file.
+- [x] **S3.16** `missing_space_before_subcommand` test — static list match.
+- [x] **S3.17** `no_command` test — controlled `$PATH` (skipped on Windows).
+- [x] **S3.18** `prove_recursively` test — needs isdir.
+- [x] **S3.19** `scm_correction` test — needs `.git`/`.hg` dir.
+- [x] **S3.20** `sudo_command_from_user_path` test — controlled `$PATH` (skipped on Windows).
+- [x] **S3.21** `wrong_hyphen_before_subcommand` test — controlled `$PATH` (skipped on Windows).
+- [x] **S3.22** `brew_unknown_command` test — output-driven.
 - [ ] **S3.23** Tests for the divergent rules that don't need infra
       (`docker_not_command` / `go_unknown_command` / `gradle_no_task`
       etc. — port the test against the static list and accept skipped
