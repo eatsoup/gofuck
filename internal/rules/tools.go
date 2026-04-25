@@ -83,14 +83,14 @@ func init() {
 		}),
 		GetNewCommand: specific.SudoRewrite(func(c *types.Command) []string {
 			if strings.Contains(c.Output, "Usage:") && len(c.ScriptParts()) > 2 {
-				// Management subcommand typo — reuse dockerCmds as approximation.
-				return utils.ReplaceCommand(c, c.ScriptParts()[2], dockerCmds)
+				// Management subcommand typo
+				return utils.ReplaceCommand(c, c.ScriptParts()[2], getDockerCommands())
 			}
 			m := dockerNotRe.FindStringSubmatch(c.Output)
 			if m == nil {
 				return nil
 			}
-			return utils.ReplaceCommand(c, m[1], dockerCmds)
+			return utils.ReplaceCommand(c, m[1], getDockerCommands())
 		}),
 	})
 
@@ -236,7 +236,7 @@ func init() {
 			if task == "require" {
 				return []string{utils.ReplaceArgument(c.Script, "require", "add")}
 			}
-			return utils.ReplaceCommand(c, task, yarnTasks)
+			return utils.ReplaceCommand(c, task, getYarnTasks())
 		},
 	})
 
@@ -324,7 +324,7 @@ func init() {
 			if len(parts) < 2 {
 				return nil
 			}
-			closest := utils.GetClosest(parts[1], golangCmds, 0.6, true)
+			closest := utils.GetClosest(parts[1], getGolangCommands(), 0.6, true)
 			return []string{utils.ReplaceArgument(c.Script, parts[1], closest)}
 		},
 	})
@@ -343,7 +343,7 @@ func init() {
 			if m == nil {
 				return nil
 			}
-			return utils.ReplaceCommand(c, strings.TrimSpace(m[1]), gemCmds)
+			return utils.ReplaceCommand(c, strings.TrimSpace(m[1]), getGemCommands())
 		},
 	})
 

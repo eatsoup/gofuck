@@ -88,7 +88,7 @@ func init() {
 			if invalid == "uninstall" {
 				return []string{strings.Replace(c.Script, "uninstall", "remove", 1)}
 			}
-			return utils.ReplaceCommand(c, invalid, aptOps)
+			return utils.ReplaceCommand(c, invalid, getAptOperations(words[0]))
 		}),
 	})
 
@@ -104,7 +104,7 @@ func init() {
 			if m == nil {
 				return nil
 			}
-			return utils.ReplaceCommand(c, m[1], dnfOps)
+			return utils.ReplaceCommand(c, m[1], getDnfOperations())
 		}),
 	})
 
@@ -123,7 +123,7 @@ func init() {
 			if inv == "uninstall" {
 				return []string{strings.Replace(c.Script, "uninstall", "remove", 1)}
 			}
-			return utils.ReplaceCommand(c, inv, yumOps)
+			return utils.ReplaceCommand(c, inv, getYumOperations())
 		}),
 	})
 

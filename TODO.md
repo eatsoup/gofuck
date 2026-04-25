@@ -45,7 +45,7 @@ Legend:
 | ag_literal | + | + | + | OK |
 | apt_get | - | n/a | + | NEEDS-RULE |
 | apt_get_search | + | + | + | OK |
-| apt_invalid_operation | + | - | + | NEEDS-TEST, DIVERGENT |
+| apt_invalid_operation | + | + | + | OK |
 | apt_list_upgradable | + | + | + | OK |
 | apt_upgrade | + | + | + | OK |
 | aws_cli | + | + | + | OK |
@@ -55,7 +55,7 @@ Legend:
 | brew_link | + | + | + | OK |
 | brew_reinstall | + | + | + | OK |
 | brew_uninstall | + | + | + | OK |
-| brew_unknown_command | + | - | + | NEEDS-TEST |
+| brew_unknown_command | + | + | + | OK |
 | brew_update_formula | + | + | + | OK |
 | cargo | + | + | - | OK |
 | cargo_no_command | + | + | + | OK |
@@ -75,15 +75,15 @@ Legend:
 | dirty_unzip | + | - | + | NEEDS-TEST |
 | django_south_ghost | + | + | + | OK |
 | django_south_merge | + | + | + | OK |
-| dnf_no_such_command | + | + | + | DIVERGENT |
+| dnf_no_such_command | + | + | + | OK |
 | docker_image_being_used_by_container | + | + | + | OK |
 | docker_login | + | + | + | OK |
-| docker_not_command | + | - | + | NEEDS-TEST, DIVERGENT |
+| docker_not_command | + | + | + | OK |
 | dry | + | + | + | OK |
 | fab_command_not_found | + | + | + | DIVERGENT |
 | fix_alt_space | + | + | + | OK |
 | fix_file | + | - | + | NEEDS-TEST |
-| gem_unknown_command | + | + | + | DIVERGENT |
+| gem_unknown_command | + | + | + | OK |
 | git_add | + | - | + | NEEDS-TEST |
 | git_add_force | + | + | + | OK |
 | git_bisect_usage | + | + | + | OK |
@@ -129,13 +129,13 @@ Legend:
 | git_tag_force | + | + | + | OK |
 | git_two_dashes | + | + | + | OK |
 | go_run | + | + | + | OK |
-| go_unknown_command | + | - | + | NEEDS-TEST, DIVERGENT |
-| gradle_no_task | + | - | + | NEEDS-TEST, DIVERGENT |
-| gradle_wrapper | + | - | + | NEEDS-TEST |
-| grep_arguments_order | + | - | + | NEEDS-TEST |
+| go_unknown_command | + | + | + | OK |
+| gradle_no_task | + | + | + | OK |
+| gradle_wrapper | + | + | + | OK |
+| grep_arguments_order | + | + | + | OK |
 | grep_recursive | + | + | + | OK |
-| grunt_task_not_found | + | - | + | NEEDS-TEST, DIVERGENT |
-| gulp_not_task | + | + | + | DIVERGENT |
+| grunt_task_not_found | + | + | + | OK |
+| gulp_not_task | + | + | + | OK |
 | has_exists_script | + | - | + | NEEDS-TEST |
 | heroku_multiple_apps | + | + | + | OK |
 | heroku_not_command | + | + | + | OK |
@@ -179,7 +179,7 @@ Legend:
 | python_module_error | + | + | + | OK |
 | quotation_marks | + | + | + | OK |
 | rails_migrations_pending | + | + | + | OK |
-| react_native_command_unrecognized | + | - | + | NEEDS-TEST, DIVERGENT |
+| react_native_command_unrecognized | + | + | + | OK |
 | remove_shell_prompt_literal | + | + | + | OK |
 | remove_trailing_cedilla | + | + | + | OK |
 | rm_dir | + | + | + | OK |
@@ -206,10 +206,10 @@ Legend:
 | workon_doesnt_exists | + | - | + | NEEDS-TEST, DIVERGENT |
 | wrong_hyphen_before_subcommand | + | - | + | NEEDS-TEST |
 | yarn_alias | + | + | + | OK |
-| yarn_command_not_found | + | - | + | NEEDS-TEST, DIVERGENT |
+| yarn_command_not_found | + | + | + | OK |
 | yarn_command_replaced | + | + | + | OK |
 | yarn_help | + | + | + | OK |
-| yum_invalid_operation | + | + | + | DIVERGENT |
+| yum_invalid_operation | + | + | + | OK |
 
 Note on test naming: upstream has three test files whose name does not match
 their rule:
@@ -243,15 +243,7 @@ rule. Each entry says what upstream does vs. what the port currently does.
 
 | Rule | Upstream | Port |
 | --- | --- | --- |
-| `apt_invalid_operation` | calls `apt --help` | static op list |
-| `dnf_no_such_command` | calls `dnf --help` | static |
-| `docker_not_command` | calls `docker --help` | static |
 | `fab_command_not_found` | parses fab's `-l` output | parses stderr |
-| `gem_unknown_command` | calls `gem help commands` | static |
-| `go_unknown_command` | calls `go help` | static |
-| `gradle_no_task` | calls `gradle tasks` | static |
-| `grunt_task_not_found` | calls `grunt --help` | static |
-| `gulp_not_task` | calls gulp | static |
 | `history` | shell-history integration | not implemented |
 | `ifconfig_device_not_found` | enumerates interfaces | static |
 | `npm_missing_script` | calls `npm run-script` | not implemented |
@@ -259,10 +251,7 @@ rule. Each entry says what upstream does vs. what the port currently does.
 | `pacman` | calls `pkgfile` | not implemented |
 | `pacman_not_found` | calls `pkgfile` | not implemented |
 | `path_from_history` | shell history | simplified fallback |
-| `react_native_command_unrecognized` | calls `react-native --help` | static |
 | `workon_doesnt_exists` | enumerates `~/.virtualenvs/` | logic diverges |
-| `yarn_command_not_found` | calls `yarn help` | static list |
-| `yum_invalid_operation` | calls `yum --help` | static |
 
 ---
 
@@ -373,13 +362,13 @@ Go tests that mirror upstream `test_<rule>.py`. Many will need a small
 
 Each of these unlocks a batch of rules.
 
-- [ ] **S4.1** `internal/specific/exec` — `Run(name, args...) (stdout, stderr,
-      err)` with a swappable seam (`var execRunner = exec.Run`) so tests
-      can inject canned outputs. Use it from `apt_invalid_operation`,
-      `dnf_no_such_command`, `docker_not_command`, `gem_unknown_command`,
-      `go_unknown_command`, `gradle_no_task`, `grunt_task_not_found`,
-      `gulp_not_task`, `react_native_command_unrecognized`,
-      `yarn_command_not_found`, `yum_invalid_operation`.
+- [x] **S4.1** `internal/specific/exec` — `Run(name, args...) (stdout, stderr, err)`
+      with a swappable seam (`var execRunner = exec.Run`) so tests can inject
+      canned outputs. Use it from `apt_invalid_operation`, `dnf_no_such_command`,
+      `docker_not_command`, `gem_unknown_command`, `go_unknown_command`,
+      `gradle_no_task`, `grunt_task_not_found`, `gulp_not_task`,
+      `react_native_command_unrecognized`, `yarn_command_not_found`,
+      `yum_invalid_operation`.
 - [ ] **S4.2** Shell-history reader (`internal/shells/history.go`):
       bash/zsh/fish history file lookup. Unblocks `history`,
       `no_command`, `path_from_history`.
