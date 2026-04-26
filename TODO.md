@@ -12,10 +12,10 @@ Upstream reference clone: `/tmp/thefuck-ref` (re-clone with
 
 - Upstream rules: **169** (plus `test.py` as `test.py.py` — odd filename).
 - Upstream test files: **167** (3 are renamed; 5 rules have no upstream test).
-- Go rules registered: **163** → 6 missing.
-- Go tests passing: **129 test functions** covering **128 rules**.
+- Go rules registered: **166** → 3 missing (`history`, `pacman`, `pacman_not_found` — all blocked on Phase 4 infra).
+- Go tests passing: **132 test functions** covering **131 rules**.
 - Rules flagged as divergent from upstream: **20**.
-- CLI binary: **not yet built** — there is no `cmd/` directory.
+- CLI binary: built (`cmd/gofuck/main.go`).
 
 The remainder of the work breaks down as:
 
@@ -43,7 +43,7 @@ Legend:
 | --- | --- | --- | --- | --- |
 | adb_unknown_command | + | + | + | OK |
 | ag_literal | + | + | + | OK |
-| apt_get | - | n/a | + | NEEDS-RULE |
+| apt_get | + | + | + | OK |
 | apt_get_search | + | + | + | OK |
 | apt_invalid_operation | + | - | + | NEEDS-TEST, DIVERGENT |
 | apt_list_upgradable | + | + | + | OK |
@@ -194,7 +194,7 @@ Legend:
 | systemctl | + | + | + | OK |
 | terraform_init | + | + | + | OK |
 | terraform_no_command | + | + | + | OK |
-| test.py | - | n/a | - | NEEDS-RULE |
+| test.py | + | n/a | - | OK (no upstream test) |
 | tmux | + | + | + | OK |
 | touch | + | + | + | OK |
 | tsuru_login | + | + | + | OK |
@@ -323,11 +323,11 @@ they are sized so that progress can be picked up at any time.
 Each of these is one task. Port the rule from upstream, register it,
 write the corresponding Go test against upstream's `test_<rule>.py`.
 
-- [ ] **S2.1** Implement `apt_get` rule (needs `CommandNotFound` lookup —
+- [x] **S2.1** Implement `apt_get` rule (needs `CommandNotFound` lookup —
       pick a static replacement or scaffold a hook for it). Test parity.
 - [x] **S2.2** Implement `man` rule. Pure string manipulation; should be
       easy. Test parity with `tests/rules/test_man.py`.
-- [ ] **S2.3** Implement `test.py` rule (1-liner; priority 900).
+- [x] **S2.3** Implement `test.py` rule (1-liner; priority 900).
 - [ ] **S2.4** Implement `history` rule (depends on shell-history infra —
       see Phase 4). Mark this blocked until S4.2 lands.
 - [ ] **S2.5** Implement `pacman` rule (depends on pkgfile infra — Phase 4).
@@ -415,6 +415,15 @@ are. Newest at the bottom.
   end-to-end on `mkdir_p`, `git_push_force`, `no_such_file`. README
   gained a "Usage" section. `go test ./...` still green. **Next:
   S2.2 (`man` rule) — pure string manipulation, easy first port.**
+- 2026-04-26 — S2.1 + S2.3 done. `apt_get` rule added with a
+  swappable `aptGetLookup` / `aptGetWhich` seam (default lookup uses a
+  small static map of common bin→pkg pairs, since we don't have
+  Python's `CommandNotFound`); test mirrors upstream's three
+  parametrize blocks. `test.py` rule added in `more.go` (priority 900,
+  no upstream test exists). 3 missing rules remain (`history`,
+  `pacman`, `pacman_not_found`), all blocked on Phase 4 infra. `go
+  test ./...` green. **Next: Phase 3 — start with S3.0 (testfs
+  helper) so the NEEDS-TEST rules can be filled in.**
 
 ---
 

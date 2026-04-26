@@ -1058,7 +1058,19 @@ func init() {
 		},
 	})
 
-	// test: empty test rule (exists in thefuck/rules/test.py — intentionally empty).
+	// test.py: when the user runs `test.py` and it is not found on PATH, suggest
+	// pytest. Priority 900 puts it ahead of python_command (default 1000) so the
+	// pytest hint wins. Rule name matches upstream filename (test.py.py → test.py).
+	Register(&types.Rule{
+		Name: "test.py", EnabledByDefault: true, RequiresOutput: true,
+		Priority: 900,
+		Match: func(c *types.Command) bool {
+			return c.Script == "test.py" && strings.Contains(c.Output, "not found")
+		},
+		GetNewCommand: func(c *types.Command) []string {
+			return []string{"pytest"}
+		},
+	})
 
 	// history — spellcheck against shell history (not implemented for Go since
 	// we don't have history integration yet).
