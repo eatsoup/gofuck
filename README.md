@@ -45,4 +45,20 @@ mkdir a/b/c 2>&1 | ./gofuck --stdin -- mkdir a/b/c
 ./gofuck --all --output "..." -- <command>
 ```
 
-Shell integration (alias, automatic capture, auto-rerun) is not implemented yet.
+### Shell integration
+
+Install the alias function in your rc file. The function exports `TF_SHELL`,
+`TF_ALIAS`, `TF_SHELL_ALIASES` and `TF_HISTORY` before invoking `gofuck`,
+then `eval`s the result and pushes the corrected command back to history.
+
+```sh
+# bash (~/.bashrc) and zsh (~/.zshrc):
+eval "$(gofuck --alias)"
+
+# fish (~/.config/fish/config.fish):
+gofuck --alias | source
+```
+
+`--alias` takes an optional name (defaults to `fuck`), so e.g.
+`gofuck --alias fix` defines a `fix` function instead. Use `--shell NAME`
+to override auto-detection.

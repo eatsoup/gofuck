@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/eatsoup/gofuck/internal/shells"
@@ -1200,16 +1201,63 @@ func init() {
 			return false
 		},
 		GetNewCommand: func(c *types.Command) []string {
-			// Without a persistent shell-history source in the Go port, we just
-			// suggest prefixing with the current working directory.
-			cwd, _ := os.Getwd()
+			var dest string
 			for _, p := range pathPats {
 				if m := p.FindStringSubmatch(c.Output); m != nil {
-					dest := m[1]
-					return []string{utils.ReplaceArgument(c.Script, dest, filepath.Join(cwd, dest))}
+					dest = m[1]
+					break
 				}
 			}
-			return nil
+			if dest == "" {
+				return nil
+			}
+
+			// Walk shell history collecting absolute paths whose tail matches
+			// `dest`, ranked by frequency. Mirrors upstream's
+			// _get_all_absolute_paths_from_history.
+			counts := map[string]int{}
+			order := []string{}
+			for _, line := range historyValidEntries(c) {
+				parts := shells.Current.SplitCommand(line)
+				if len(parts) <= 1 {
+					continue
+				}
+				for _, tok := range parts[1:] {
+					if !(strings.HasPrefix(tok, "/") || strings.HasPrefix(tok, "~")) {
+						continue
+					}
+					tok = strings.TrimSuffix(tok, "/")
+					if _, ok := counts[tok]; !ok {
+						order = append(order, tok)
+					}
+					counts[tok]++
+				}
+			}
+			// Stable sort by count desc.
+			sort.SliceStable(order, func(i, j int) bool { return counts[order[i]] > counts[order[j]] })
+
+			var out []string
+			for _, p := range order {
+				expanded := p
+				if strings.HasPrefix(expanded, "~") {
+					if home, err := os.UserHomeDir(); err == nil {
+						expanded = home + p[1:]
+					}
+				}
+				if !strings.HasSuffix(p, dest) {
+					continue
+				}
+				if _, err := os.Stat(expanded); err != nil {
+					continue
+				}
+				out = append(out, utils.ReplaceArgument(c.Script, dest, p))
+			}
+			if len(out) > 0 {
+				return out
+			}
+			// Fallback: prefix with cwd, like the original simple implementation.
+			cwd, _ := os.Getwd()
+			return []string{utils.ReplaceArgument(c.Script, dest, filepath.Join(cwd, dest))}
 		},
 	})
 

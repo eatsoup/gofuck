@@ -12,13 +12,14 @@ Upstream reference clone: `/tmp/thefuck-ref` (re-clone with
 
 - Upstream rules: **169** (plus `test.py` as `test.py.py` — odd filename).
 - Upstream test files: **167** (3 are renamed; 5 rules have no upstream test).
-- Go rules registered: **166** → 3 missing (`history`, `pacman`, `pacman_not_found` — all blocked on Phase 4 infra).
-- Go tests passing: **132 test functions** covering **131 rules**, plus the
-  exec-seam unit tests and per-tool parser tests.
-- Rules flagged as divergent from upstream: **9** (down from 20 — the 11
-  subprocess-driven rules now use the swappable exec seam and parse real
-  tool output, falling back to a static list only when the binary is
-  missing or the help format is unrecognised).
+- Go rules registered: **167** → 2 missing (`pacman`, `pacman_not_found` —
+  both blocked on Phase 4 pkgfile infra).
+- Go tests passing: **135 test functions** covering **134 rules**, plus
+  exec-seam, history-reader and alias-parser unit tests.
+- Rules flagged as divergent from upstream: **7** (down from 20 — the 11
+  subprocess-driven rules use the exec seam, and `history` /
+  `path_from_history` now read real shell history via the new
+  `internal/shells/history.go`).
 - CLI binary: built (`cmd/gofuck/main.go`).
 
 The remainder of the work breaks down as:
@@ -143,7 +144,7 @@ Legend:
 | has_exists_script | + | - | + | NEEDS-TEST |
 | heroku_multiple_apps | + | + | + | OK |
 | heroku_not_command | + | + | + | OK |
-| history | - | n/a | + | NEEDS-RULE, DIVERGENT |
+| history | + | + | + | OK |
 | hostscli | + | + | + | OK |
 | ifconfig_device_not_found | + | - | + | NEEDS-TEST, DIVERGENT |
 | java | + | + | + | OK |
@@ -172,7 +173,7 @@ Legend:
 | pacman | - | n/a | + | NEEDS-RULE, DIVERGENT |
 | pacman_invalid_option | + | + | + | OK |
 | pacman_not_found | - | n/a | + | NEEDS-RULE, DIVERGENT |
-| path_from_history | + | - | + | NEEDS-TEST, DIVERGENT |
+| path_from_history | + | - | + | NEEDS-TEST |
 | php_s | + | + | + | OK |
 | pip_install | + | + | + | OK |
 | pip_unknown_command | + | + | + | OK |
@@ -248,13 +249,11 @@ rule. Each entry says what upstream does vs. what the port currently does.
 | Rule | Upstream | Port |
 | --- | --- | --- |
 | `fab_command_not_found` | parses fab's `-l` output | parses stderr |
-| `history` | shell-history integration | not implemented |
 | `ifconfig_device_not_found` | enumerates interfaces | static |
 | `npm_missing_script` | calls `npm run-script` | not implemented |
 | `npm_run_script` | calls `npm run-script` | not implemented |
 | `pacman` | calls `pkgfile` | not implemented |
 | `pacman_not_found` | calls `pkgfile` | not implemented |
-| `path_from_history` | shell history | simplified fallback |
 | `workon_doesnt_exists` | enumerates `~/.virtualenvs/` | logic diverges |
 
 The 11 subprocess-driven rules (`apt_invalid_operation`,
@@ -275,7 +274,11 @@ can inject canned outputs.
 - ~~Subprocess invocation helpers (with test-time mocking seam) for rules
   that call external tools (`apt --help`, `gem help commands`, etc.).~~
   **Done — `internal/specific/exec`.**
-- Shell-history reader for `no_command`, `history`, `path_from_history`.
+- ~~Shell-history reader for `no_command`, `history`, `path_from_history`.~~
+  **Done — `internal/shells/history.go` with bash/zsh/fish parsers and
+  `historyOpenFile` test seam. Also exposed via `gofuck --alias`, which
+  prints a shell function that exports `TF_HISTORY` / `TF_SHELL_ALIASES`
+  the way upstream does.**
 - `ifconfig` / interface enumeration helper.
 - `pkgfile` integration for the pacman rules.
 - Test-helper for tmpdir + chdir + `t.Setenv("PATH", ...)` so the
@@ -333,8 +336,8 @@ write the corresponding Go test against upstream's `test_<rule>.py`.
 - [x] **S2.2** Implement `man` rule. Pure string manipulation; should be
       easy. Test parity with `tests/rules/test_man.py`.
 - [x] **S2.3** Implement `test.py` rule (1-liner; priority 900).
-- [ ] **S2.4** Implement `history` rule (depends on shell-history infra —
-      see Phase 4). Mark this blocked until S4.2 lands.
+- [x] **S2.4** Implement `history` rule (uses shell-history infra from S4.2;
+      tests parametrised the same way as upstream `test_history.py`).
 - [ ] **S2.5** Implement `pacman` rule (depends on pkgfile infra — Phase 4).
 - [ ] **S2.6** Implement `pacman_not_found` rule (depends on pkgfile infra).
 
@@ -387,9 +390,12 @@ Each of these unlocks a batch of rules.
       `yum_invalid_operation`. Per-tool parsing helpers live in
       `internal/rules/cmdops.go` and fall back to the existing static
       lists when the subprocess fails (binary missing, parse failure).
-- [ ] **S4.2** Shell-history reader (`internal/shells/history.go`):
-      bash/zsh/fish history file lookup. Unblocks `history`,
-      `no_command`, `path_from_history`.
+- [x] **S4.2** Shell-history reader (`internal/shells/history.go`):
+      bash/zsh/fish history file lookup with a swappable `historyOpenFile`
+      seam. Wired into the new `history` rule and into
+      `path_from_history` (which now ranks paths from history before
+      falling back to the cwd-prefix heuristic). `no_command` still uses
+      PATH-only lookup; switching it to history is a follow-up.
 - [ ] **S4.3** Network interface enumerator: net.Interfaces() lookup.
       Unblocks `ifconfig_device_not_found`.
 - [ ] **S4.4** `pkgfile` integration: `internal/specific/archlinux.go`.
@@ -443,6 +449,22 @@ are. Newest at the bottom.
   (`internal/rules/cmdops_test.go`). `go test ./...` green.
   **Next: Phase 3 — S3.0 testfs helper, then add the NEEDS-TEST tests
   for divergent rules now that the exec seam is available.**
+- 2026-04-26 — Shell integration pass. S4.2 (shell-history reader) and
+  S2.4 (history rule) done. New `internal/shells/history.go` with
+  `historyOpenFile` / `historyHomeDir` seams; bash, zsh and fish each
+  override `GetHistory()` with the right path + line parser (zsh's
+  `: ts:0;cmd` extended format and fish's `- cmd:` yaml-ish format).
+  `parseAliasEnv` reads `TF_SHELL_ALIASES` so the AppAlias-exported
+  alias list is respected. `AppAlias` rewritten for all three shells
+  to mirror upstream's full multi-line function (exports `TF_SHELL`,
+  `TF_ALIAS`, `TF_SHELL_ALIASES`, `TF_HISTORY`, runs gofuck, eval's
+  the result, pushes the corrected command back to history).
+  `cmd/gofuck` gained `--alias [name]` and `--shell NAME` flags so a
+  user can install with `eval "$(gofuck --alias)"` (bash/zsh) or
+  `gofuck --alias | source` (fish). `path_from_history` now ranks
+  candidate paths from history rather than blindly prefixing the cwd.
+  Smoke-tested end-to-end against a fixture history file. `go test
+  ./...` green. **Next: Phase 3 — S3.0 testfs helper.**
 
 ---
 
