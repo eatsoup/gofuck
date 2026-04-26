@@ -344,11 +344,6 @@ func init() {
 
 	// gradle_no_task
 	gradleRe := regexp.MustCompile(`Task '(.*)' (is ambiguous|not found)`)
-	gradleTasks := []string{
-		"assemble", "build", "check", "clean", "test", "install", "publish",
-		"bootRun", "run", "jar", "war", "compileJava", "dependencies", "tasks",
-		"wrapper",
-	}
 	Register(&types.Rule{
 		Name: "gradle_no_task", EnabledByDefault: true, RequiresOutput: true,
 		Match: func(c *types.Command) bool {
@@ -359,7 +354,7 @@ func init() {
 			if m == nil {
 				return nil
 			}
-			return utils.ReplaceCommand(c, m[1], gradleTasks)
+			return utils.ReplaceCommand(c, m[1], getGradleTasks(c.ScriptParts()[0]))
 		},
 	})
 
@@ -386,7 +381,6 @@ func init() {
 
 	// grunt_task_not_found
 	gruntRe := regexp.MustCompile(`Warning: Task "(.*)" not found\.`)
-	gruntTasks := []string{"default", "build", "test", "watch", "concat", "clean", "copy", "uglify", "jshint", "lint"}
 	Register(&types.Rule{
 		Name: "grunt_task_not_found", EnabledByDefault: true, RequiresOutput: true,
 		Match: func(c *types.Command) bool {
@@ -398,7 +392,7 @@ func init() {
 				return nil
 			}
 			bad := strings.Split(m[1], ":")[0]
-			return utils.ReplaceCommand(c, bad, gruntTasks)
+			return utils.ReplaceCommand(c, bad, getGruntTasks())
 		},
 	})
 
@@ -414,7 +408,7 @@ func init() {
 			if m == nil {
 				return nil
 			}
-			return utils.ReplaceCommand(c, m[1], []string{"default", "build", "test", "watch", "lint"})
+			return utils.ReplaceCommand(c, m[1], getGulpTasks())
 		},
 	})
 
@@ -634,7 +628,6 @@ func init() {
 
 	// react_native_command_unrecognized
 	rnRe := regexp.MustCompile(`Unrecognized command '(.*)'`)
-	rnCmds := []string{"start", "run-android", "run-ios", "link", "unlink", "upgrade", "init", "log-android", "log-ios", "info", "bundle"}
 	Register(&types.Rule{
 		Name: "react_native_command_unrecognized", EnabledByDefault: true, RequiresOutput: true,
 		Match: func(c *types.Command) bool {
@@ -645,7 +638,7 @@ func init() {
 			if m == nil {
 				return nil
 			}
-			return utils.ReplaceCommand(c, m[1], rnCmds)
+			return utils.ReplaceCommand(c, m[1], getReactNativeCmds())
 		},
 	})
 
