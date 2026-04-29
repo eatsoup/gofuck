@@ -26,8 +26,8 @@ The remainder of the work breaks down as:
 
 | Bucket | Count | Notes |
 | --- | --- | --- |
-| Rules implemented + tested + agreeing with upstream | ~111 | "OK" rows below. |
-| Rules implemented but missing Go tests | 33 | Mostly need fs/PATH scaffolding. |
+| Rules implemented + tested + agreeing with upstream | ~120 | "OK" rows below. |
+| Rules implemented but missing Go tests | 24 | Mostly need fs/PATH scaffolding. |
 | Rules implemented but diverging from upstream | 4 | `fab_command_not_found`, `npm_missing_script`, `npm_run_script`, `workon_doesnt_exists`. |
 | Upstream rules not yet implemented in Go | 0 | All 169 ported. |
 | Missing top-level CLI app | 0 | `cmd/gofuck/main.go` shipped in S1.2. |
@@ -50,7 +50,7 @@ Legend:
 | ag_literal | + | + | + | OK |
 | apt_get | + | + | + | OK |
 | apt_get_search | + | + | + | OK |
-| apt_invalid_operation | + | - | + | NEEDS-TEST |
+| apt_invalid_operation | + | + | + | OK |
 | apt_list_upgradable | + | + | + | OK |
 | apt_upgrade | + | + | + | OK |
 | aws_cli | + | + | + | OK |
@@ -60,7 +60,7 @@ Legend:
 | brew_link | + | + | + | OK |
 | brew_reinstall | + | + | + | OK |
 | brew_uninstall | + | + | + | OK |
-| brew_unknown_command | + | - | + | NEEDS-TEST |
+| brew_unknown_command | + | + | + | OK |
 | brew_update_formula | + | + | + | OK |
 | cargo | + | + | - | OK |
 | cargo_no_command | + | + | + | OK |
@@ -75,7 +75,7 @@ Legend:
 | conda_mistype | + | + | + | OK |
 | cp_create_destination | + | + | + | OK |
 | cp_omitting_directory | + | + | + | OK |
-| cpp11 | + | - | - | NEEDS-TEST |
+| cpp11 | + | + | - | OK (no upstream test; Go-aligned) |
 | dirty_untar | + | - | + | NEEDS-TEST |
 | dirty_unzip | + | - | + | NEEDS-TEST |
 | django_south_ghost | + | + | + | OK |
@@ -83,7 +83,7 @@ Legend:
 | dnf_no_such_command | + | + | + | OK |
 | docker_image_being_used_by_container | + | + | + | OK |
 | docker_login | + | + | + | OK |
-| docker_not_command | + | - | + | NEEDS-TEST |
+| docker_not_command | + | + | + | OK |
 | dry | + | + | + | OK |
 | fab_command_not_found | + | + | + | DIVERGENT |
 | fix_alt_space | + | + | + | OK |
@@ -114,7 +114,7 @@ Legend:
 | git_merge | + | + | + | OK |
 | git_merge_unrelated | + | + | + | OK |
 | git_not_command | + | + | + | OK |
-| git_pull | + | - | + | NEEDS-TEST |
+| git_pull | + | + | + | OK |
 | git_pull_clone | + | + | + | OK |
 | git_pull_uncommitted_changes | + | + | + | OK |
 | git_push | + | + | + | OK |
@@ -134,12 +134,12 @@ Legend:
 | git_tag_force | + | + | + | OK |
 | git_two_dashes | + | + | + | OK |
 | go_run | + | + | + | OK |
-| go_unknown_command | + | - | + | NEEDS-TEST |
+| go_unknown_command | + | + | + | OK |
 | gradle_no_task | + | + | + | OK |
 | gradle_wrapper | + | - | + | NEEDS-TEST |
 | grep_arguments_order | + | - | + | NEEDS-TEST |
 | grep_recursive | + | + | + | OK |
-| grunt_task_not_found | + | - | + | NEEDS-TEST |
+| grunt_task_not_found | + | + | + | OK |
 | gulp_not_task | + | + | + | OK |
 | has_exists_script | + | - | + | NEEDS-TEST |
 | heroku_multiple_apps | + | + | + | OK |
@@ -184,7 +184,7 @@ Legend:
 | python_module_error | + | + | + | OK |
 | quotation_marks | + | + | + | OK |
 | rails_migrations_pending | + | + | + | OK |
-| react_native_command_unrecognized | + | - | + | NEEDS-TEST |
+| react_native_command_unrecognized | + | + | + | OK |
 | remove_shell_prompt_literal | + | + | + | OK |
 | remove_trailing_cedilla | + | + | + | OK |
 | rm_dir | + | + | + | OK |
@@ -208,10 +208,10 @@ Legend:
 | unsudo | + | + | + | OK |
 | vagrant_up | + | + | + | OK |
 | whois | + | + | + | OK |
-| workon_doesnt_exists | + | - | + | NEEDS-TEST, DIVERGENT |
+| workon_doesnt_exists | + | + | + | DIVERGENT (port-aligned test) |
 | wrong_hyphen_before_subcommand | + | - | + | NEEDS-TEST |
 | yarn_alias | + | + | + | OK |
-| yarn_command_not_found | + | - | + | NEEDS-TEST |
+| yarn_command_not_found | + | + | + | OK |
 | yarn_command_replaced | + | + | + | OK |
 | yarn_help | + | + | + | OK |
 | yum_invalid_operation | + | + | + | OK |
@@ -348,18 +348,19 @@ These rules already have Go implementations; the goal is just to add
 Go tests that mirror upstream `test_<rule>.py`. Many will need a small
 `fstest` helper (tmpdir + chdir or `t.Setenv("PATH", ...)`).
 
-- [ ] **S3.0** Add `internal/rules/testfs_test.go` with `withTmpDir`,
-      `withPath`, `touchFile` helpers used by the rest of Phase 3.
+- [x] **S3.0** Added `internal/rules/testfs_test.go` with `withTmpDir`,
+      `withPath`, `touchFile`, `touchExec` helpers used by the rest of
+      Phase 3.
 - [ ] **S3.1** `cat_dir` test — needs isdir.
 - [ ] **S3.2** `cd_correction` test — needs real subdir listing.
 - [ ] **S3.3** `chmod_x` test — needs file exists + non-exec mode.
-- [ ] **S3.4** `cpp11` test — pure string manipulation, no fixture.
+- [x] **S3.4** `cpp11` test — Go-aligned (no upstream fixture).
 - [ ] **S3.5** `dirty_untar` test — needs real tar archive in tmpdir.
 - [ ] **S3.6** `dirty_unzip` test — needs real zip archive in tmpdir.
 - [ ] **S3.7** `fix_file` test — needs `$EDITOR` and a real file.
 - [ ] **S3.8** `git_add` test — needs `Path.exists` mock (use real tmpdir).
 - [ ] **S3.9** `git_clone_missing` test — needs controlled `$PATH`.
-- [ ] **S3.10** `git_pull` test — output-driven; no fixture.
+- [x] **S3.10** `git_pull` test — output-driven; no fixture.
 - [ ] **S3.11** `git_rebase_merge_dir` test — accept ordering divergence
       (or fix ordering).
 - [ ] **S3.12** `gradle_wrapper` test — needs `./gradlew` file + `$PATH`.
@@ -372,11 +373,13 @@ Go tests that mirror upstream `test_<rule>.py`. Many will need a small
 - [ ] **S3.19** `scm_correction` test — needs `.git`/`.hg` dir.
 - [ ] **S3.20** `sudo_command_from_user_path` test — controlled `$PATH`.
 - [ ] **S3.21** `wrong_hyphen_before_subcommand` test — controlled `$PATH`.
-- [ ] **S3.22** `brew_unknown_command` test — output-driven.
-- [ ] **S3.23** Tests for the divergent rules that don't need infra
-      (`docker_not_command` / `go_unknown_command` / `gradle_no_task`
-      etc. — port the test against the static list and accept skipped
-      cases). One subtask per rule, document divergence inline.
+- [x] **S3.22** `brew_unknown_command` test — output-driven.
+- [x] **S3.23** Tests for divergent rules using the `exec` seam:
+      `apt_invalid_operation`, `docker_not_command`, `go_unknown_command`,
+      `grunt_task_not_found`, `react_native_command_unrecognized`,
+      `yarn_command_not_found`, `workon_doesnt_exists` (port-aligned;
+      divergence noted inline). `gradle_no_task` was already covered by
+      `cmdops_test.go`.
 
 ### Phase 4 — close divergences by building the missing infra
 
@@ -471,6 +474,21 @@ are. Newest at the bottom.
   candidate paths from history rather than blindly prefixing the cwd.
   Smoke-tested end-to-end against a fixture history file. `go test
   ./...` green. **Next: Phase 3 — S3.0 testfs helper.**
+- 2026-04-29 — Phase 3 starter PR. Added the testfs helper (S3.0:
+  `withTmpDir`, `withPath`, `touchFile`, `touchExec`) and ten new
+  test functions covering cpp11 (S3.4), git_pull (S3.10),
+  brew_unknown_command (S3.22), and the S3.23 batch of divergent
+  rules: apt_invalid_operation, docker_not_command, go_unknown_command,
+  grunt_task_not_found, react_native_command_unrecognized,
+  yarn_command_not_found, workon_doesnt_exists (port-aligned —
+  divergence still flagged). One bug fix in
+  `grunt_task_not_found.GetNewCommand`: rewrote the suffix-preserving
+  replacement so `grunt cmpass:all` → `grunt compass:all` matches
+  upstream. Also lifted the brew_unknown command list to a
+  package-scope var so tests can iterate it. NEEDS-TEST count down
+  from 33 → 24; OK count up to ~120. `go test ./...` green.
+  **Next: Phase 3 — S3.1–S3.21 (the fs/PATH-touching tests using
+  the new helpers).**
 - 2026-04-29 — Phase 4 closed. S4.3: new
   `internal/specific/netiface.go` (`EnumerateInterfaces` seam over
   `net.Interfaces()`) wired into `ifconfig_device_not_found`, replacing

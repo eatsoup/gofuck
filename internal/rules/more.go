@@ -393,7 +393,11 @@ func init() {
 				return nil
 			}
 			bad := strings.Split(m[1], ":")[0]
-			return utils.ReplaceCommand(c, bad, getGruntTasks())
+			fixed := utils.GetClosest(bad, getGruntTasks(), 0.6, false)
+			if fixed == "" {
+				return nil
+			}
+			return []string{strings.Replace(c.Script, " "+bad, " "+fixed, 1)}
 		},
 	})
 
