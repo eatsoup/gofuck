@@ -831,7 +831,7 @@ func init() {
 		}),
 	})
 
-	// ifconfig_device_not_found — needs interface listing; produce a best-effort swap.
+	// ifconfig_device_not_found
 	Register(&types.Rule{
 		Name: "ifconfig_device_not_found", EnabledByDefault: true, RequiresOutput: true,
 		Match: func(c *types.Command) bool {
@@ -844,8 +844,7 @@ func init() {
 				return nil
 			}
 			iface := first[:len(first)-1]
-			// Use a small static list of plausible interfaces; tests mock this.
-			return utils.ReplaceCommand(c, iface, []string{"eth0", "lo", "wlan0", "enp0s3"})
+			return utils.ReplaceCommand(c, iface, specific.EnumerateInterfaces())
 		},
 	})
 
