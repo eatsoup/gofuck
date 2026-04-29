@@ -12,25 +12,25 @@ Upstream reference clone: `/tmp/thefuck-ref` (re-clone with
 
 - Upstream rules: **169** (plus `test.py` as `test.py.py` — odd filename).
 - Upstream test files: **167** (3 are renamed; 5 rules have no upstream test).
-- Go rules registered: **167** → 2 missing (`pacman`, `pacman_not_found` —
-  both blocked on Phase 4 pkgfile infra).
-- Go tests passing: **135 test functions** covering **134 rules**, plus
-  exec-seam, history-reader and alias-parser unit tests.
-- Rules flagged as divergent from upstream: **7** (down from 20 — the 11
-  subprocess-driven rules use the exec seam, and `history` /
-  `path_from_history` now read real shell history via the new
-  `internal/shells/history.go`).
+- Go rules registered: **169** — full coverage; Phase 4 closed the last
+  gaps (`pacman`, `pacman_not_found`).
+- Go tests passing: **141 test functions** covering **136 rules**, plus
+  exec-seam, history-reader, archlinux/pkgfile and alias-parser unit tests.
+- Rules flagged as divergent from upstream: **4** (`fab_command_not_found`,
+  `npm_missing_script`, `npm_run_script`, `workon_doesnt_exists`). The
+  `ifconfig_device_not_found` and pacman rules now use real interface
+  enumeration / pkgfile lookups via `internal/specific/`.
 - CLI binary: built (`cmd/gofuck/main.go`).
 
 The remainder of the work breaks down as:
 
 | Bucket | Count | Notes |
 | --- | --- | --- |
-| Rules implemented + tested + agreeing with upstream | ~108 | "OK" rows below. |
-| Rules implemented but missing Go tests | 34 | Mostly need fs/PATH scaffolding. |
-| Rules implemented but diverging from upstream | 20 | Need subprocess/history/pkgfile infra. |
-| Upstream rules not yet implemented in Go | 6 | `apt_get`, `history`, `man`, `pacman`, `pacman_not_found`, `test.py`. |
-| Missing top-level CLI app | 1 | No `main.go`; nothing to run by hand. |
+| Rules implemented + tested + agreeing with upstream | ~111 | "OK" rows below. |
+| Rules implemented but missing Go tests | 33 | Mostly need fs/PATH scaffolding. |
+| Rules implemented but diverging from upstream | 4 | `fab_command_not_found`, `npm_missing_script`, `npm_run_script`, `workon_doesnt_exists`. |
+| Upstream rules not yet implemented in Go | 0 | All 169 ported. |
+| Missing top-level CLI app | 0 | `cmd/gofuck/main.go` shipped in S1.2. |
 
 ---
 
@@ -146,7 +146,7 @@ Legend:
 | heroku_not_command | + | + | + | OK |
 | history | + | + | + | OK |
 | hostscli | + | + | + | OK |
-| ifconfig_device_not_found | + | - | + | NEEDS-TEST, DIVERGENT |
+| ifconfig_device_not_found | + | + | + | OK |
 | java | + | + | + | OK |
 | javac | + | + | + | OK |
 | lein_not_task | + | + | + | OK |
@@ -170,9 +170,9 @@ Legend:
 | npm_wrong_command | + | + | + | OK |
 | omnienv_no_such_command | + | + | + | OK |
 | open | + | + | + | OK |
-| pacman | - | n/a | + | NEEDS-RULE, DIVERGENT |
+| pacman | + | + | + | OK |
 | pacman_invalid_option | + | + | + | OK |
-| pacman_not_found | - | n/a | + | NEEDS-RULE, DIVERGENT |
+| pacman_not_found | + | + | + | OK |
 | path_from_history | + | - | + | NEEDS-TEST |
 | php_s | + | + | + | OK |
 | pip_install | + | + | + | OK |
@@ -249,11 +249,8 @@ rule. Each entry says what upstream does vs. what the port currently does.
 | Rule | Upstream | Port |
 | --- | --- | --- |
 | `fab_command_not_found` | parses fab's `-l` output | parses stderr |
-| `ifconfig_device_not_found` | enumerates interfaces | static |
 | `npm_missing_script` | calls `npm run-script` | not implemented |
 | `npm_run_script` | calls `npm run-script` | not implemented |
-| `pacman` | calls `pkgfile` | not implemented |
-| `pacman_not_found` | calls `pkgfile` | not implemented |
 | `workon_doesnt_exists` | enumerates `~/.virtualenvs/` | logic diverges |
 
 The 11 subprocess-driven rules (`apt_invalid_operation`,
@@ -279,8 +276,12 @@ can inject canned outputs.
   `historyOpenFile` test seam. Also exposed via `gofuck --alias`, which
   prints a shell function that exports `TF_HISTORY` / `TF_SHELL_ALIASES`
   the way upstream does.**
-- `ifconfig` / interface enumeration helper.
-- `pkgfile` integration for the pacman rules.
+- ~~`ifconfig` / interface enumeration helper.~~
+  **Done — `internal/specific/netiface.go` with a swappable
+  `EnumerateInterfaces` seam backed by `net.Interfaces()`.**
+- ~~`pkgfile` integration for the pacman rules.~~
+  **Done — `internal/specific/archlinux.go` (`GetPkgfile`, `PacmanCmd`,
+  `PkgfileEnabled`).**
 - Test-helper for tmpdir + chdir + `t.Setenv("PATH", ...)` so the
   filesystem-touching rules can be tested cleanly.
 
@@ -338,8 +339,8 @@ write the corresponding Go test against upstream's `test_<rule>.py`.
 - [x] **S2.3** Implement `test.py` rule (1-liner; priority 900).
 - [x] **S2.4** Implement `history` rule (uses shell-history infra from S4.2;
       tests parametrised the same way as upstream `test_history.py`).
-- [ ] **S2.5** Implement `pacman` rule (depends on pkgfile infra — Phase 4).
-- [ ] **S2.6** Implement `pacman_not_found` rule (depends on pkgfile infra).
+- [x] **S2.5** Implement `pacman` rule (landed with S4.4).
+- [x] **S2.6** Implement `pacman_not_found` rule (landed with S4.4).
 
 ### Phase 3 — fill in the missing tests for already-ported rules
 
@@ -396,12 +397,17 @@ Each of these unlocks a batch of rules.
       `path_from_history` (which now ranks paths from history before
       falling back to the cwd-prefix heuristic). `no_command` still uses
       PATH-only lookup; switching it to history is a follow-up.
-- [ ] **S4.3** Network interface enumerator: net.Interfaces() lookup.
-      Unblocks `ifconfig_device_not_found`.
-- [ ] **S4.4** `pkgfile` integration: `internal/specific/archlinux.go`.
-      Unblocks `pacman`, `pacman_not_found`.
-- [ ] **S4.5** Re-test divergent rules now matching upstream behaviour;
-      update the table above.
+- [x] **S4.3** Network interface enumerator (`internal/specific/netiface.go`)
+      backed by `net.Interfaces()` with a swappable `EnumerateInterfaces`
+      seam. Wired into `ifconfig_device_not_found`; matrix entry flipped
+      from NEEDS-TEST/DIVERGENT to OK.
+- [x] **S4.4** `pkgfile` integration (`internal/specific/archlinux.go`):
+      `GetPkgfile`, `PacmanCmd` (yay/pikaur/yaourt/sudo pacman detector),
+      and `PkgfileEnabled` flag. New `internal/rules/pacman.go` registers
+      the `pacman` and `pacman_not_found` rules; tests mirror upstream's
+      `test_pacman.py` and `test_pacman_not_found.py` parametrize blocks.
+- [x] **S4.5** Divergence table refreshed — `ifconfig_device_not_found`
+      and the two pacman rules dropped out.
 
 ### Phase 5 — exhaustive parity check
 
@@ -465,6 +471,19 @@ are. Newest at the bottom.
   candidate paths from history rather than blindly prefixing the cwd.
   Smoke-tested end-to-end against a fixture history file. `go test
   ./...` green. **Next: Phase 3 — S3.0 testfs helper.**
+- 2026-04-29 — Phase 4 closed. S4.3: new
+  `internal/specific/netiface.go` (`EnumerateInterfaces` seam over
+  `net.Interfaces()`) wired into `ifconfig_device_not_found`, replacing
+  the static interface list. S4.4: new
+  `internal/specific/archlinux.go` (`GetPkgfile`, `PacmanCmd` wrapper
+  detector, `PkgfileEnabled`) plus `internal/rules/pacman.go` registering
+  `pacman` + `pacman_not_found` (S2.5/S2.6). Tests in
+  `ifconfig_test.go`, `pacman_test.go`, and `archlinux_test.go` mirror
+  the corresponding upstream `test_*.py` parametrize blocks. Divergence
+  table now shows 4 entries (`fab_command_not_found`, both `npm_*`,
+  `workon_doesnt_exists`); all 169 upstream rules registered.
+  `go test ./...` green. **Next: Phase 3 — S3.0 testfs helper, then
+  fill the remaining NEEDS-TEST rows.**
 
 ---
 
