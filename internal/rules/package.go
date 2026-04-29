@@ -33,6 +33,15 @@ var yumOps = []string{
 	"update", "update-minimal", "updateinfo", "upgrade", "version",
 }
 
+// brewCmds is the static fallback command list for brew_unknown_command.
+// Lifted to package scope so tests can iterate it the way upstream does
+// (`for command in _brew_commands(): assert not match(...)`).
+var brewCmds = []string{
+	"info", "home", "options", "install", "uninstall",
+	"search", "list", "update", "upgrade", "pin", "unpin",
+	"doctor", "create", "edit", "cask",
+}
+
 func init() {
 	// apt_get_search
 	aptGetPat := regexp.MustCompile(`^apt-get`)
@@ -212,11 +221,6 @@ func init() {
 
 	// brew_unknown_command — use a static fallback command list.
 	brewUnkRe := regexp.MustCompile(`Error: Unknown command: ([a-z]+)`)
-	brewCmds := []string{
-		"info", "home", "options", "install", "uninstall",
-		"search", "list", "update", "upgrade", "pin", "unpin",
-		"doctor", "create", "edit", "cask",
-	}
 	Register(&types.Rule{
 		Name: "brew_unknown_command", EnabledByDefault: true, RequiresOutput: true,
 		Match: func(c *types.Command) bool {
